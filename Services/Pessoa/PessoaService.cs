@@ -40,6 +40,10 @@ public class PessoaService : IPessoaService
 
     public async Task<PessoaDto> CriarAsync(CreatePessoaDto createPessoaDto)
     {
+        var existente = await _pessoaRepository.ObterPorNomeAsync(createPessoaDto.Nome);
+        if (existente != null)
+            throw new ArgumentException("Já existe uma pessoa cadastrada com este nome");
+
         var pessoa = new Pessoa(createPessoaDto.Nome, createPessoaDto.Idade);
         var pessoaCriada = await _pessoaRepository.CriarAsync(pessoa);
 
@@ -56,6 +60,10 @@ public class PessoaService : IPessoaService
         var pessoa = await _pessoaRepository.ObterPorIdAsync(id);
         if (pessoa == null)
             return null;
+
+        var existente = await _pessoaRepository.ObterPorNomeAsync(updatePessoaDto.Nome);
+        if (existente != null && existente.Id != id)
+            throw new ArgumentException("Já existe outra pessoa cadastrada com este nome");
 
         pessoa.Nome = updatePessoaDto.Nome;
         pessoa.Idade = updatePessoaDto.Idade;

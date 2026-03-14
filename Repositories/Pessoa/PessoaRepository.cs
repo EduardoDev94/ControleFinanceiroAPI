@@ -23,6 +23,12 @@ public class PessoaRepository : IPessoaRepository
         return await _context.Pessoas.FindAsync(id);
     }
 
+    public async Task<Pessoa> ObterPorNomeAsync(string nome)
+    {
+        return await _context.Pessoas
+            .FirstOrDefaultAsync(p => p.Nome.ToLower() == nome.ToLower());
+    }
+
     public async Task<Pessoa> CriarAsync(Pessoa pessoa)
     {
         _context.Pessoas.Add(pessoa);
