@@ -39,7 +39,7 @@ public class CategoriasController : ControllerBase
             return BadRequest(ModelState);
 
         var categoria = await _categoriaService.CriarAsync(createCategoriaDto);
-        return CreatedAtAction(nameof(ObterPorIdAsync), new { id = categoria.Id }, categoria);
+        return CreatedAtAction("ObterPorId", new { id = categoria.Id }, categoria);
     }
 
     [HttpPut("{id}")]
