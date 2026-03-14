@@ -30,10 +30,7 @@ public class Pessoa
     public string Nome { get; set; }
 
     [Required(ErrorMessage = "A idade é obrigatória")]
-    [Range(0, 100, ErrorMessage = "A idade deve estar entre 0 e 150 anos")]
+    [Range(0, 150, ErrorMessage = "A idade deve estar entre 0 e 100 anos")]
     public int Idade { get; set; }
 
 }
-
-
-
