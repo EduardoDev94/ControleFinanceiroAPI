@@ -40,6 +40,10 @@ public class CategoriaService : ICategoriaService
 
     public async Task<CategoriaDto> CriarAsync(CreateCategoriaDto createCategoriaDto)
     {
+        var existente = await _categoriaRepository.ObterPorDescricaoAsync(createCategoriaDto.Descricao);
+        if (existente != null)
+            throw new ArgumentException("Já existe uma categoria cadastrada com esta descrição");
+
         var categoria = new Categoria(createCategoriaDto.Descricao, createCategoriaDto.Finalidade);
         var categoriaCriada = await _categoriaRepository.CriarAsync(categoria);
 
@@ -56,6 +60,10 @@ public class CategoriaService : ICategoriaService
         var categoria = await _categoriaRepository.ObterPorIdAsync(id);
         if (categoria == null)
             return null;
+
+        var existente = await _categoriaRepository.ObterPorDescricaoAsync(updateCategoriaDto.Descricao);
+        if (existente != null && existente.Id != id)
+            throw new ArgumentException("Já existe outra categoria cadastrada com esta descrição");
 
         categoria.Descricao = updateCategoriaDto.Descricao;
         categoria.Finalidade = updateCategoriaDto.Finalidade;

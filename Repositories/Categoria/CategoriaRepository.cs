@@ -23,6 +23,12 @@ public class CategoriaRepository : ICategoriaRepository
         return await _context.Categorias.FindAsync(id);
     }
 
+    public async Task<Categoria> ObterPorDescricaoAsync(string descricao)
+    {
+        return await _context.Categorias
+            .FirstOrDefaultAsync(c => c.Descricao.ToLower() == descricao.ToLower());
+    }
+
     public async Task<Categoria> CriarAsync(Categoria categoria)
     {
         _context.Categorias.Add(categoria);
