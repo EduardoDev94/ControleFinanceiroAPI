@@ -1,12 +1,23 @@
-﻿namespace ControleFinanceiro.Entities;
+namespace ControleFinanceiro.Entities;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 public class Pessoa
 {
-    public Pessoa(Guid id, string nome, int idade)
+    public Pessoa() { }
+
+    // Construtor para Criação
+    public Pessoa(string nome, int idade)
     {
         Id = Guid.NewGuid();
+        Nome = nome;
+        Idade = idade;
+    }
+
+    // Construtor para Alteração/Carregamento
+    public Pessoa(Guid id, string nome, int idade)
+    {
+        Id = id;
         Nome = nome;
         Idade = idade;
     }

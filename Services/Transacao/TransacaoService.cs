@@ -79,7 +79,6 @@ public class TransacaoService : ITransacaoService
             throw new ArgumentException("Pessoa não encontrada");
 
         var transacao = new Transacao(
-            Guid.NewGuid(),
             createTransacaoDto.Descricao,
             createTransacaoDto.Valor,
             createTransacaoDto.Tipo,

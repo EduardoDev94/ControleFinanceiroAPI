@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ControleFinanceiro.Entities;
@@ -13,9 +13,20 @@ public enum FinalidadeCategoria
 [Table("Categorias")]
 public class Categoria
 {
-    public Categoria(Guid id, string descricao, FinalidadeCategoria finalidade)
+    public Categoria() { }
+
+    // Construtor para Criação (novo cadastro)
+    public Categoria(string descricao, FinalidadeCategoria finalidade)
     {
         Id = Guid.NewGuid();
+        Descricao = descricao;
+        Finalidade = finalidade;
+    }
+
+    // Construtor para Alteração/Carregamento
+    public Categoria(Guid id, string descricao, FinalidadeCategoria finalidade)
+    {
+        Id = id;
         Descricao = descricao;
         Finalidade = finalidade;
     }

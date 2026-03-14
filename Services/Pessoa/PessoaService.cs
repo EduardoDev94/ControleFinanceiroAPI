@@ -40,7 +40,7 @@ public class PessoaService : IPessoaService
 
     public async Task<PessoaDto> CriarAsync(CreatePessoaDto createPessoaDto)
     {
-        var pessoa = new Pessoa(Guid.NewGuid(), createPessoaDto.Nome, createPessoaDto.Idade);
+        var pessoa = new Pessoa(createPessoaDto.Nome, createPessoaDto.Idade);
         var pessoaCriada = await _pessoaRepository.CriarAsync(pessoa);
 
         return new PessoaDto

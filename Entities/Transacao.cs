@@ -12,9 +12,23 @@ public enum TipoTransacao
 [Table("Transacoes")]
 public class Transacao
 {
-    public Transacao(Guid id, string descricao, decimal valor, TipoTransacao tipo, Guid categoriaId, Guid pessoaId)
+    public Transacao() { }
+
+    // Construtor para Criação
+    public Transacao(string descricao, decimal valor, TipoTransacao tipo, Guid categoriaId, Guid pessoaId)
     {
         Id = Guid.NewGuid();
+        Descricao = descricao;
+        Valor = valor;
+        Tipo = tipo;
+        CategoriaId = categoriaId;
+        PessoaId = pessoaId;
+    }
+
+    // Construtor para Alteração/Carregamento
+    public Transacao(Guid id, string descricao, decimal valor, TipoTransacao tipo, Guid categoriaId, Guid pessoaId)
+    {
+        Id = id;
         Descricao = descricao;
         Valor = valor;
         Tipo = tipo;

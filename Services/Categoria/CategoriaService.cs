@@ -40,7 +40,7 @@ public class CategoriaService : ICategoriaService
 
     public async Task<CategoriaDto> CriarAsync(CreateCategoriaDto createCategoriaDto)
     {
-        var categoria = new Categoria(Guid.NewGuid(), createCategoriaDto.Descricao, createCategoriaDto.Finalidade);
+        var categoria = new Categoria(createCategoriaDto.Descricao, createCategoriaDto.Finalidade);
         var categoriaCriada = await _categoriaRepository.CriarAsync(categoria);
 
         return new CategoriaDto
