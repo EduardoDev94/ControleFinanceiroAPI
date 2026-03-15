@@ -78,6 +78,10 @@ public class TransacaoService : ITransacaoService
         if (pessoa == null)
             throw new ArgumentException("Pessoa não encontrada");
 
+        // Validar se menor de idade pode apenas fazer despesas
+        if (pessoa.Idade < 18 && createTransacaoDto.Tipo == TipoTransacao.Receita)
+            throw new ArgumentException("Menores de idade só podem fazer despesas");
+
         var transacao = new Transacao(
             createTransacaoDto.Descricao,
             createTransacaoDto.Valor,
@@ -124,6 +128,10 @@ public class TransacaoService : ITransacaoService
         var pessoa = await _pessoaRepository.ObterPorIdAsync(updateTransacaoDto.PessoaId);
         if (pessoa == null)
             throw new ArgumentException("Pessoa não encontrada");
+
+        // Validar se menor de idade pode apenas fazer despesas
+        if (pessoa.Idade < 18 && updateTransacaoDto.Tipo == TipoTransacao.Receita)
+            throw new ArgumentException("Menores de idade só podem fazer despesas");
 
         transacao.Descricao = updateTransacaoDto.Descricao;
         transacao.Valor = updateTransacaoDto.Valor;
