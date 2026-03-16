@@ -9,4 +9,5 @@ public interface ITransacaoRepository
     Task<Transacao> CriarAsync(Transacao transacao);
     Task<Transacao> AtualizarAsync(Transacao transacao);
     Task<bool> DeletarAsync(Guid id);
+    Task<IEnumerable<Transacao>> ListarPorPessoaIdAsync(Guid pessoaId);
 }

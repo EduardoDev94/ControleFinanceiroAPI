@@ -3,14 +3,17 @@ namespace ControleFinanceiro.Services.Pessoa;
 using ControleFinanceiro.DTOs.Pessoa;
 using ControleFinanceiro.Entities;
 using ControleFinanceiro.Repositories.Pessoa;
+using ControleFinanceiro.Repositories.Transacao;
 
 public class PessoaService : IPessoaService
 {
     private readonly IPessoaRepository _pessoaRepository;
+    private readonly ITransacaoRepository _transacaoRepository;
 
-    public PessoaService(IPessoaRepository pessoaRepository)
+    public PessoaService(IPessoaRepository pessoaRepository, ITransacaoRepository transacaoRepository)
     {
         _pessoaRepository = pessoaRepository;
+        _transacaoRepository = transacaoRepository;
     }
 
     public async Task<IEnumerable<PessoaDto>> ListarAsync()
@@ -81,5 +84,70 @@ public class PessoaService : IPessoaService
     public async Task<bool> DeletarAsync(Guid id)
     {
         return await _pessoaRepository.DeletarAsync(id);
+    }
+
+    public async Task<IEnumerable<PessoaTotalDto>> ListarComTotaisAsync()
+    {
+        var pessoas = await _pessoaRepository.ListarAsync();
+        var pessoaTotais = new List<PessoaTotalDto>();
+
+        foreach (var pessoa in pessoas)
+        {
+            var transacoes = await _transacaoRepository.ListarPorPessoaIdAsync(pessoa.Id);
+
+            var totalReceitas = transacoes
+                .Where(t => t.Tipo == TipoTransacao.Receita)
+                .Sum(t => t.Valor);
+
+            var totalDespesas = transacoes
+                .Where(t => t.Tipo == TipoTransacao.Despesa)
+                .Sum(t => t.Valor);
+
+            var saldo = totalReceitas - totalDespesas;
+
+            pessoaTotais.Add(new PessoaTotalDto
+            {
+                Id = pessoa.Id,
+                Nome = pessoa.Nome,
+                Idade = pessoa.Idade,
+                TotalReceitas = totalReceitas,
+                TotalDespesas = totalDespesas,
+                Saldo = saldo
+            });
+        }
+
+        return pessoaTotais;
+    }
+
+    public async Task<TotalGeralDto> ObterTotalGeralAsync()
+    {
+        var pessoas = await _pessoaRepository.ListarAsync();
+        decimal totalReceitasGeral = 0;
+        decimal totalDespesasGeral = 0;
+
+        foreach (var pessoa in pessoas)
+        {
+            var transacoes = await _transacaoRepository.ListarPorPessoaIdAsync(pessoa.Id);
+
+            var totalReceitas = transacoes
+                .Where(t => t.Tipo == TipoTransacao.Receita)
+                .Sum(t => t.Valor);
+
+            var totalDespesas = transacoes
+                .Where(t => t.Tipo == TipoTransacao.Despesa)
+                .Sum(t => t.Valor);
+
+            totalReceitasGeral += totalReceitas;
+            totalDespesasGeral += totalDespesas;
+        }
+
+        var saldoGeral = totalReceitasGeral - totalDespesasGeral;
+
+        return new TotalGeralDto
+        {
+            TotalReceitasGeral = totalReceitasGeral,
+            TotalDespesasGeral = totalDespesasGeral,
+            SaldoGeral = saldoGeral
+        };
     }
 }

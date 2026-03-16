@@ -53,4 +53,13 @@ public class TransacaoRepository : ITransacaoRepository
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<IEnumerable<Transacao>> ListarPorPessoaIdAsync(Guid pessoaId)
+    {
+        return await _context.Transacoes
+            .Where(t => t.PessoaId == pessoaId)
+            .Include(t => t.Categoria)
+            .Include(t => t.Pessoa)
+            .ToListAsync();
+    }
 }
