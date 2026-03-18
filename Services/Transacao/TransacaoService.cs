@@ -1,6 +1,7 @@
 namespace ControleFinanceiro.Services.Transacao;
 
 using ControleFinanceiro.DTOs.Transacao;
+using ControleFinanceiro.DTOs.Categoria;
 using ControleFinanceiro.Entities;
 using ControleFinanceiro.Repositories.Transacao;
 using ControleFinanceiro.Repositories.Categoria;
@@ -157,5 +158,50 @@ public class TransacaoService : ITransacaoService
     public async Task<bool> DeletarAsync(Guid id)
     {
         return await _transacaoRepository.DeletarAsync(id);
+    }
+
+    public async Task<TotaisCategoriasDto> ObterTotaisPorCategoriaAsync()
+    {
+        var categorias = await _categoriaRepository.ListarAsync();
+        var transacoes = await _transacaoRepository.ListarAsync();
+
+        var categoriasComTotais = new List<CategoriaTotalDto>();
+        decimal totalReceitasGeral = 0;
+        decimal totalDespesasGeral = 0;
+
+        foreach (var categoria in categorias)
+        {
+            var transacoesCategoria = transacoes
+                .Where(t => t.CategoriaId == categoria.Id)
+                .ToList();
+
+            var totalReceitas = transacoesCategoria
+                .Where(t => t.Tipo == TipoTransacao.Receita)
+                .Sum(t => t.Valor);
+
+            var totalDespesas = transacoesCategoria
+                .Where(t => t.Tipo == TipoTransacao.Despesa)
+                .Sum(t => t.Valor);
+
+            categoriasComTotais.Add(new CategoriaTotalDto
+            {
+                Id = categoria.Id,
+                Descricao = categoria.Descricao,
+                TotalReceitas = totalReceitas,
+                TotalDespesas = totalDespesas,
+                Saldo = totalReceitas - totalDespesas
+            });
+
+            totalReceitasGeral += totalReceitas;
+            totalDespesasGeral += totalDespesas;
+        }
+
+        return new TotaisCategoriasDto
+        {
+            Categorias = categoriasComTotais,
+            TotalReceitasGeral = totalReceitasGeral,
+            TotalDespesasGeral = totalDespesasGeral,
+            SaldoGeral = totalReceitasGeral - totalDespesasGeral
+        };
     }
 }

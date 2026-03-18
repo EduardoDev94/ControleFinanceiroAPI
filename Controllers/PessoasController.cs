@@ -4,6 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using ControleFinanceiro.Services.Pessoa;
 using ControleFinanceiro.DTOs.Pessoa;
 
+/// <summary>
+/// Controller responsável pelo gerenciamento de pessoas.
+/// Expõe endpoints para criação, listagem, edição, exclusão e consulta de totais financeiros por pessoa.
+/// Ao excluir uma pessoa, todas as suas transações são removidas automaticamente.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class PessoasController : ControllerBase
@@ -15,6 +20,7 @@ public class PessoasController : ControllerBase
         _pessoaService = pessoaService;
     }
 
+    /// <summary>Retorna todas as pessoas cadastradas.</summary>
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PessoaDto>>> ListarAsync()
     {
@@ -22,6 +28,10 @@ public class PessoasController : ControllerBase
         return Ok(pessoas);
     }
 
+    /// <summary>
+    /// Retorna o resumo financeiro de todas as pessoas: total de receitas,
+    /// despesas e saldo individual, além dos totais gerais consolidados.
+    /// </summary>
     [HttpGet("totais")]
     public async Task<ActionResult<TotaisPessoasDto>> ObterTotaisPorPessoaAsync()
     {
@@ -29,6 +39,7 @@ public class PessoasController : ControllerBase
         return Ok(totais);
     }
 
+    /// <summary>Retorna uma pessoa pelo seu identificador único.</summary>
     [HttpGet("{id}")]
     public async Task<ActionResult<PessoaDto>> ObterPorIdAsync(Guid id)
     {
@@ -39,6 +50,7 @@ public class PessoasController : ControllerBase
         return Ok(pessoa);
     }
 
+    /// <summary>Cria uma nova pessoa. Retorna 400 se os dados forem inválidos.</summary>
     [HttpPost]
     public async Task<ActionResult<PessoaDto>> CriarAsync([FromBody] CreatePessoaDto createPessoaDto)
     {
@@ -48,7 +60,7 @@ public class PessoasController : ControllerBase
         try
         {
             var pessoa = await _pessoaService.CriarAsync(createPessoaDto);
-            return CreatedAtAction(nameof(ObterPorIdAsync), new { id = pessoa.Id }, pessoa);
+            return Created($"/api/Pessoas/{pessoa.Id}", pessoa);
         }
         catch (ArgumentException ex)
         {
@@ -56,6 +68,7 @@ public class PessoasController : ControllerBase
         }
     }
 
+    /// <summary>Atualiza os dados de uma pessoa existente. Retorna 404 se não encontrada.</summary>
     [HttpPut("{id}")]
     public async Task<ActionResult<PessoaDto>> AtualizarAsync(Guid id, [FromBody] UpdatePessoaDto updatePessoaDto)
     {
@@ -76,6 +89,10 @@ public class PessoasController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Remove uma pessoa pelo identificador. Todas as transações associadas
+    /// são excluídas em cascata antes da remoção da pessoa.
+    /// </summary>
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeletarAsync(Guid id)
     {
