@@ -14,14 +14,6 @@ public class Pessoa
         Idade = idade;
     }
 
-    // Construtor para Alteração/Carregamento
-    public Pessoa(Guid id, string nome, int idade)
-    {
-        Id = id;
-        Nome = nome;
-        Idade = idade;
-    }
-
     [Key]
     public Guid Id { get; set; }
 

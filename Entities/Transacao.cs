@@ -25,17 +25,6 @@ public class Transacao
         PessoaId = pessoaId;
     }
 
-    // Construtor para Alteração/Carregamento
-    public Transacao(Guid id, string descricao, decimal valor, TipoTransacao tipo, Guid categoriaId, Guid pessoaId)
-    {
-        Id = id;
-        Descricao = descricao;
-        Valor = valor;
-        Tipo = tipo;
-        CategoriaId = categoriaId;
-        PessoaId = pessoaId;
-    }
-
     [Key]
     public Guid Id { get; set; }
 

@@ -30,8 +30,8 @@ public class PessoaService : IPessoaService
     public async Task<PessoaDto> ObterPorIdAsync(Guid id)
     {
         var pessoa = await _pessoaRepository.ObterPorIdAsync(id);
-        if (pessoa == null)
-            return null;
+        if (pessoa == null) return null;
+
 
         return new PessoaDto
         {
@@ -43,9 +43,6 @@ public class PessoaService : IPessoaService
 
     public async Task<PessoaDto> CriarAsync(CreatePessoaDto createPessoaDto)
     {
-        var existente = await _pessoaRepository.ObterPorNomeAsync(createPessoaDto.Nome);
-        if (existente != null)
-            throw new ArgumentException("Já existe uma pessoa cadastrada com este nome");
 
         var pessoa = new Pessoa(createPessoaDto.Nome, createPessoaDto.Idade);
         var pessoaCriada = await _pessoaRepository.CriarAsync(pessoa);
@@ -61,16 +58,11 @@ public class PessoaService : IPessoaService
     public async Task<PessoaDto> AtualizarAsync(Guid id, UpdatePessoaDto updatePessoaDto)
     {
         var pessoa = await _pessoaRepository.ObterPorIdAsync(id);
-        if (pessoa == null)
-            return null;
+        if (pessoa == null) return null;
 
-        var existente = await _pessoaRepository.ObterPorNomeAsync(updatePessoaDto.Nome);
-        if (existente != null && existente.Id != id)
-            throw new ArgumentException("Já existe outra pessoa cadastrada com este nome");
 
         pessoa.Nome = updatePessoaDto.Nome;
         pessoa.Idade = updatePessoaDto.Idade;
-
         var pessoaAtualizada = await _pessoaRepository.AtualizarAsync(pessoa);
 
         return new PessoaDto
@@ -83,29 +75,45 @@ public class PessoaService : IPessoaService
 
     public async Task<bool> DeletarAsync(Guid id)
     {
+        var pessoa = await _pessoaRepository.ObterPorIdAsync(id);
+        if (pessoa == null)
+            return false;
+
+        var transacoes = await _transacaoRepository.ListarPorPessoaIdAsync(id);
+        foreach (var transacao in transacoes)
+        {
+            await _transacaoRepository.DeletarAsync(transacao.Id);
+        }
+
         return await _pessoaRepository.DeletarAsync(id);
     }
 
-    public async Task<IEnumerable<PessoaTotalDto>> ListarComTotaisAsync()
+    public async Task<TotaisPessoasDto> ObterTotaisPorPessoaAsync()
     {
         var pessoas = await _pessoaRepository.ListarAsync();
-        var pessoaTotais = new List<PessoaTotalDto>();
+        var todasAsTransacoes = await _transacaoRepository.ListarAsync();
+
+        var pessoasComTotais = new List<PessoaTotalDto>();
+        decimal totalReceitasGeral = 0;
+        decimal totalDespesasGeral = 0;
 
         foreach (var pessoa in pessoas)
         {
-            var transacoes = await _transacaoRepository.ListarPorPessoaIdAsync(pessoa.Id);
+            var transacoesPessoa = todasAsTransacoes
+                .Where(t => t.PessoaId == pessoa.Id)
+                .ToList();
 
-            var totalReceitas = transacoes
+            var totalReceitas = transacoesPessoa
                 .Where(t => t.Tipo == TipoTransacao.Receita)
                 .Sum(t => t.Valor);
 
-            var totalDespesas = transacoes
+            var totalDespesas = transacoesPessoa
                 .Where(t => t.Tipo == TipoTransacao.Despesa)
                 .Sum(t => t.Valor);
 
             var saldo = totalReceitas - totalDespesas;
 
-            pessoaTotais.Add(new PessoaTotalDto
+            pessoasComTotais.Add(new PessoaTotalDto
             {
                 Id = pessoa.Id,
                 Nome = pessoa.Nome,
@@ -114,28 +122,6 @@ public class PessoaService : IPessoaService
                 TotalDespesas = totalDespesas,
                 Saldo = saldo
             });
-        }
-
-        return pessoaTotais;
-    }
-
-    public async Task<TotalGeralDto> ObterTotalGeralAsync()
-    {
-        var pessoas = await _pessoaRepository.ListarAsync();
-        decimal totalReceitasGeral = 0;
-        decimal totalDespesasGeral = 0;
-
-        foreach (var pessoa in pessoas)
-        {
-            var transacoes = await _transacaoRepository.ListarPorPessoaIdAsync(pessoa.Id);
-
-            var totalReceitas = transacoes
-                .Where(t => t.Tipo == TipoTransacao.Receita)
-                .Sum(t => t.Valor);
-
-            var totalDespesas = transacoes
-                .Where(t => t.Tipo == TipoTransacao.Despesa)
-                .Sum(t => t.Valor);
 
             totalReceitasGeral += totalReceitas;
             totalDespesasGeral += totalDespesas;
@@ -143,8 +129,9 @@ public class PessoaService : IPessoaService
 
         var saldoGeral = totalReceitasGeral - totalDespesasGeral;
 
-        return new TotalGeralDto
+        return new TotaisPessoasDto
         {
+            Pessoas = pessoasComTotais,
             TotalReceitasGeral = totalReceitasGeral,
             TotalDespesasGeral = totalDespesasGeral,
             SaldoGeral = saldoGeral

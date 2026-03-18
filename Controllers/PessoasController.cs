@@ -22,18 +22,11 @@ public class PessoasController : ControllerBase
         return Ok(pessoas);
     }
 
-    [HttpGet("totais-por-pessoa")]
-    public async Task<ActionResult<IEnumerable<PessoaTotalDto>>> ListarComTotaisAsync()
+    [HttpGet("totais")]
+    public async Task<ActionResult<TotaisPessoasDto>> ObterTotaisPorPessoaAsync()
     {
-        var totais = await _pessoaService.ListarComTotaisAsync();
+        var totais = await _pessoaService.ObterTotaisPorPessoaAsync();
         return Ok(totais);
-    }
-
-    [HttpGet("total-geral")]
-    public async Task<ActionResult<TotalGeralDto>> ObterTotalGeralAsync()
-    {
-        var totalGeral = await _pessoaService.ObterTotalGeralAsync();
-        return Ok(totalGeral);
     }
 
     [HttpGet("{id}")]

@@ -10,6 +10,5 @@ public interface IPessoaService
     Task<PessoaDto> CriarAsync(CreatePessoaDto createPessoaDto);
     Task<PessoaDto> AtualizarAsync(Guid id, UpdatePessoaDto updatePessoaDto);
     Task<bool> DeletarAsync(Guid id);
-    Task<IEnumerable<PessoaTotalDto>> ListarComTotaisAsync();
-    Task<TotalGeralDto> ObterTotalGeralAsync();
+    Task<TotaisPessoasDto> ObterTotaisPorPessoaAsync();
 }
